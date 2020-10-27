@@ -14,9 +14,12 @@
 
 
 <div class="container-fluid mt-3" id="app">
-    <input type="text" class="form-control mt-3" v-model="criterioDeBusqueda1" placeholder="Ingresar un nombre o mail...">
-    <input type="text" class="form-control mt-3" v-model="criterioDeBusqueda2" placeholder="Ingresar un DNI...">
-    <p v-if="mostrar"  class="container-fluid mt-3" >Cantidad minima es de 3 caracteres</p>
+    <input type="text" class="form-control mt-3" v-model="busquedaString" placeholder="Ingresar un nombre o mail...">    
+    <input type="text" class="form-control mt-3" v-model="busquedaDni" placeholder="Ingresar un DNI...">
+
+    <p v-if="!this.stringValido() || !this.dniValido()"  class="alert alert-warning mt-3" >La cantidad minima de caracteres es de 3</p>
+    <p v-if="personasFiltradas.length == 0"  class="alert alert-warning mt-3" >La persona no se encuentra en la lista</p>
+   
     <br>
     <div class="card-deck m-0">
         <div class="row">
@@ -40,9 +43,8 @@
     new Vue({
         el: '#app',
         data: {
-            criterioDeBusqueda1: '',
-            criterioDeBusqueda2: '',
-            mostrar: false,
+            busquedaString: '',
+            busquedaDni: '',
             //Aquí, en este array es donde tienen que agregar su información
             personas:
                 [
@@ -50,7 +52,7 @@
                     //Agregar aquí nombre, apellido, dni y correo
                     { nombre: 'Alan',apellido:'Faerverguer',dni:40829735,correo:'faeralan@gmail.com' },
                     { nombre: 'Ivan',apellido:'Fajgenblum',dni:42023692,correo:'ifagen@hotmail.com' },
-                    { nombre: 'Ivan',apellido:'Fajgenblum',dni:12345678,correo:'ifagen@hotmail.com' },
+                    { nombre: 'Andres',apellido:'Fajgenblum',dni:12345678,correo:'afagen@hotmail.com'  },
                     { nombre: 'Julián', apellido: 'Brea', dni: 40937404, correo: 'julian.brea@hotmail.com' },
                     { nombre: 'Mauro', apellido: 'Abraham', dni: 37143235, correo: 'maauro.db@gmail.com' },
                     { nombre: 'Pablo Hernan', apellido: 'Aquino', dni: 32123456, correo: 'pablohaquino@gmail.com' },
@@ -62,22 +64,17 @@
             personasFiltradas() {
                 let listaDePersonas = this.personas
                 this.mostrar = false
-                if(this.criterioDeBusqueda1 != ''){
-                    if(!this.validarAncho(this.criterioDeBusqueda1)){
-                        listaDePersonas =listaDePersonas.filter((persona) => {
-                            let registroCompleto = `${persona.nombre}${persona.apellido}${persona.correo}`
-                            return registroCompleto.toLowerCase().includes(this.criterioDeBusqueda1.toLowerCase())
+
+                    if(this.stringValido && this.dniValido){
+
+                        listaDePersonas = listaDePersonas.filter((persona) => {
+                            let registroString = `${persona.nombre}${persona.apellido}${persona.correo}`
+                            let registroDni = `${persona.dni}`
+
+                            return registroString.toLowerCase().includes(this.busquedaString.toLowerCase()) &&
+                                    registroDni.includes(this.busquedaDni)
                         });
                     }
-                } else if(this.criterioDeBusqueda2 != ''){
-                    if(!this.validarAncho(this.criterioDeBusqueda2)){
-                        listaDePersonas = listaDePersonas.filter((persona) => {
-                            let registroCompleto = `${persona.dni}`
-                            return registroCompleto.toLowerCase().includes(this.criterioDeBusqueda2)
-                        });
-                    } 
-                }
-                
                 return listaDePersonas
             }
         },
@@ -85,14 +82,11 @@
             getNombreCompleto(persona) {
                 return `${persona.nombre} ${persona.apellido}`
             },
-            validarAncho(busqueda){
-            let anchoMin = 4
-                if( busqueda.length < anchoMin){
-                    this.mostrar = true 
-                } else {
-                    this.mostrar = false
-                }
-                return this.mostrar 
+            stringValido(){
+                return  this.busquedaString.length == 0 || this.busquedaString.length >= 3 
+            }, 
+            dniValido(){
+                return  this.busquedaDni.length == 0 || this.busquedaDni.length >= 3 
             }
         }
     });
